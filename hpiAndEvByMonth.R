@@ -19,11 +19,40 @@ evn_data <- evn_data %>%
 hpi_data <- hpi_data %>%
     filter(Date >= "1997-01-01")
 
-# since hpi data is monthly, group eviction data by month and year
-# also change date format to just year and month
+# # plot evn
+# ggplot(evn_data, aes(x = Date)) +
+#     geom_histogram(binwidth = 30, color = "black", fill = "white") +
+#     labs(title = "Evictions by Month",
+#          x = "Date",
+#          y = "Count")
+
+# # plot hpi
+# ggplot(hpi_data, aes(x = Date, y = hpi)) +
+#     geom_line(color = "black") +
+#     labs(title = "HPI by Month",
+#          x = "Date",
+#          y = "HPI")
+
+# group evn by month and just use first day of each month
 evn_data <- evn_data %>%
-    group_by(year = format(Date, "%Y"), month = format(Date, "%m")) %>%
-    summarise(count = n())
-hpi_data <- hpi_data %>%
-    group_by(year = format(Date, "%Y"), month = format(Date, "%m")) %>%
-    summarise(hpi = mean(hpi))
+    group_by(Date = floor_date(Date, "month")) %>%
+    summarise(count_by_month = n())
+
+# plot evn and hpi together but hpi is too small to see so scale it up by 20
+ggplot() +
+    geom_line(data = evn_data, aes(x = Date, y = count_by_month), color = "black") +
+    geom_line(data = hpi_data, aes(x = Date, y = hpi * 20), color = "red") +
+    labs(title = "Evictions and HPI by Month",
+         x = "Date",
+         y = "Count")
+
+
+
+# # since hpi data is monthly, group eviction data by month and year
+# # also change date format to just year and month
+# evn_data <- evn_data %>%
+#     group_by(year = format(Date, "%Y"), month = format(Date, "%m")) %>%
+#     summarise(count = n())
+# hpi_data <- hpi_data %>%
+#     group_by(year = format(Date, "%Y"), month = format(Date, "%m")) %>%
+#     summarise(hpi = mean(hpi))
