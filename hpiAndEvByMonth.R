@@ -38,10 +38,10 @@ evn_data <- evn_data %>%
     group_by(Date = floor_date(Date, "month")) %>%
     summarise(count_by_month = n())
 
-# plot evn and hpi together but hpi is too small to see so scale it up by 20
+# plot evn and hpi together but hpi is too small to see so scale it up by 15
 ggplot() +
     geom_line(data = evn_data, aes(x = Date, y = count_by_month), color = "black") +
-    geom_line(data = hpi_data, aes(x = Date, y = hpi * 20), color = "red") +
+    geom_line(data = hpi_data, aes(x = Date, y = hpi * 10), color = "red") +
     labs(title = "Evictions and HPI by Month",
          x = "Date",
          y = "Count")
