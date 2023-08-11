@@ -11,8 +11,8 @@ evictions = pd.read_csv("sfevictionnotices.csv", usecols=["File Date", "Non Paym
                                                           "Lead Remediation", "Development",
                                                           "Good Samaritan Ends"])
 
-# Reshape the DataFrame to long format
-evictions_long = pd.melt(evictions, id_vars=["File Date"], value_vars=["Non Payment", "Breach", "Nuisance",
+# Reshape the DataFrame to long format to put the eviction types in one column
+evictions = pd.melt(evictions, id_vars=["File Date"], value_vars=["Non Payment", "Breach", "Nuisance",
                                                                        "Illegal Use", "Failure to Sign Renewal",
                                                                        "Access Denial", "Unapproved Subtenant",
                                                                        "Owner Move In", "Demolition",
@@ -25,10 +25,7 @@ evictions_long = pd.melt(evictions, id_vars=["File Date"], value_vars=["Non Paym
                          var_name="Eviction Type", value_name="Is True")
 
 # Filter the rows where the condition is met
-filtered_evictions = evictions_long[evictions_long["Is True"]]
+evictions = evictions[evictions["Is True"]]
 
-filtered_evictions = evictions_long[evictions_long["Is True"]].copy()
-filtered_evictions.drop("Is True", axis=1, inplace=True)
-
-# Display the resulting DataFrame
-print(filtered_evictions)
+evictions = evictions[evictions["Is True"]].copy()
+evictions.drop("Is True", axis=1, inplace=True)
