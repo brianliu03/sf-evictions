@@ -1,11 +1,12 @@
-library(tidyverse)
 library(dplyr)
+library(tidyr)
 
 
 # function for dataset to be easier to work with
 restructure <- function(data) {
   data <- mutate_file_point(data)
   data <- delete_unnecessary_columns(data)
+  data <- format_types(data)
   return(data)
 }
 
@@ -27,17 +28,36 @@ delete_unnecessary_columns <- function(data) {
   return(data %>%
     select(
       -c("Eviction.ID", "Address", "City", "State", "Constraints.Date",
-        "Eviction.Notice.Source.Zipcode", "Location", "Shape",
-        "SF.Find.Neighborhoods", "Current.Police.Districts",
-        "Current.Supervisor.Districts", "Analysis.Neighborhoods",
+        "Location", "Shape", "SF.Find.Neighborhoods", "Analysis.Neighborhoods",
+        "Current.Police.Districts", "Eviction.Notice.Source.Zipcode",
         "DELETE...Neighborhoods", "DELETE...Police.Districts",
         "DELETE...Supervisor.Districts", "DELETE...Zip.Codes",
         "Supervisor.District", "DELETE...Fire.Prevention.Districts",
-        "CBD..BID.and.GBD.Boundaries.as.of.2017",
-        "Areas.of.Vulnerability..2016", "Central.Market.Tenderloin..Boundary",
+        "CBD..BID.and.GBD.Boundaries.as.of.2017", "Neighborhoods",
+        "Areas.of.Vulnerability..2016", "Central.Market.Tenderloin.Boundary",
         "Central.Market.Tenderloin.Boundary.Polygon...Updated",
-        "Fix.It.Zones.as.of.2018.02.07", "Neighborhoods")
+        "Fix.It.Zones.as.of.2018.02.07", "Current.Supervisor.Districts",
+        "Central.Market.Tenderloin.Boundary")
     )
+  )
+}
+
+# function to format eviction types into one col
+format_types <- function(data) {
+  return(data <- data %>%
+    pivot_longer(
+      cols =
+        c("Non.Payment", "Breach", "Nuisance", "Illegal.Use",
+          "Failure.to.Sign.Renewal", "Access.Denial", "Unapproved.Subtenant",
+          "Owner.Move.In", "Demolition", "Capital.Improvement",
+          "Ellis.Act.WithDrawal", "Condo.Conversion", "Roommate.Same.Unit",
+          "Other.Cause", "Late.Payments", "Lead.Remediation", "Development",
+          "Good.Samaritan.Ends", "Substantial.Rehab"),
+      names_to = "eviction_type",
+      values_to = "eviction_count",
+      values_transform = list(eviction_count = as.logical)) %>%
+  filter(eviction_count == TRUE) %>% # nolint
+  select(-eviction_count)
   )
 }
 
