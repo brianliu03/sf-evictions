@@ -8,24 +8,14 @@ library(data.table)
 #   add_osm_feature(key = "highway") %>%
 #   osmdata_sf()
 
-source("sfevictionsfunctions.R")
+source("rfiles/algo.R")
 
 # read in eviction data
 eviction_data <- read.csv("sfevictionnotices.csv", header = TRUE, sep = ",")
 eviction_data <- as_tibble(data.frame(eviction_data))
 
-# add longitude and latitude columns to eviction data
-# and convert File.Date to Date
-eviction_data <- eviction_data %>%
-  mutate(
-    longitude = as.double(
-      gsub("\\s.*", "",
-        gsub("POINT \\(", "", eviction_data$Shape))),
-    latitude = as.double(
-      gsub("\\).*", "",
-          gsub(".*\\s", "",
-              gsub("POINT \\(", "", eviction_data$Shape)))),
-    File.Date = as.Date(File.Date, format = "%m/%d/%Y"), )
+# restructure eviction data
+eviction_data <- restructure(eviction_data)
 
 counts_by_month_year <- get_counts_by_month_year(eviction_data)
 

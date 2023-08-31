@@ -1,19 +1,60 @@
 library(tidyverse)
+library(dplyr)
+
+
+# function for dataset to be easier to work with
+restructure <- function(data) {
+  data <- mutate_file_point(data)
+  data <- delete_unnecessary_columns(data)
+  return(data)
+}
+
+# function to mutate file date and shape column
+mutate_file_point <- function(data) {
+  return(data %>%
+    mutate(
+      File.Date = as.Date(data$File.Date, format = "%m/%d/%Y"),
+      longitude = as.double(
+        gsub("\\s.*", "", gsub("POINT \\(", "", data$Shape))),
+      latitude = as.double(
+        gsub("\\).*", "", gsub(".*\\s", "", gsub("POINT \\(", "", data$Shape))))
+    )
+  )
+}
+
+# function to delete unnecessary columns
+delete_unnecessary_columns <- function(data) {
+  return(data %>%
+    select(
+      -c("Eviction.ID", "Address", "City", "State", "Constraints.Date",
+        "Eviction.Notice.Source.Zipcode", "Location", "Shape",
+        "SF.Find.Neighborhoods", "Current.Police.Districts",
+        "Current.Supervisor.Districts", "Analysis.Neighborhoods",
+        "DELETE...Neighborhoods", "DELETE...Police.Districts",
+        "DELETE...Supervisor.Districts", "DELETE...Zip.Codes",
+        "Supervisor.District", "DELETE...Fire.Prevention.Districts",
+        "CBD..BID.and.GBD.Boundaries.as.of.2017",
+        "Areas.of.Vulnerability..2016", "Central.Market.Tenderloin..Boundary",
+        "Central.Market.Tenderloin.Boundary.Polygon...Updated",
+        "Fix.It.Zones.as.of.2018.02.07", "Neighborhoods")
+    )
+  )
+}
 
 # function to get evictions by season
 get_evictions_by_season <- function(data) {
   spring_evictions <- data %>%
-    filter(substring(File.Date, 6, 10) >= "03-01" &
-             substring(File.Date, 6, 10) <= "05-31")
+    filter(substring(data$File.Date, 6, 10) >= "03-01" &
+                substring(data$File.Date, 6, 10) <= "05-31")
   summer_evictions <- data %>%
-    filter(substring(File.Date, 6, 10) >= "06-01" &
-             substring(File.Date, 6, 10) <= "08-31")
+    filter(substring(data$File.Date, 6, 10) >= "06-01" &
+             substring(data$File.Date, 6, 10) <= "08-31")
   fall_evictions <- data %>%
-    filter(substring(File.Date, 6, 10) >= "09-01" &
-             substring(File.Date, 6, 10) <= "11-30")
+    filter(substring(data$File.Date, 6, 10) >= "09-01" &
+             substring(data$File.Date, 6, 10) <= "11-30")
   winter_evictions <- data %>%
-    filter(substring(File.Date, 6, 10) >= "12-01" &
-             substring(File.Date, 6, 10) <= "2-29")
+    filter(substring(data$File.Date, 6, 10) >= "12-01" &
+             substring(data$File.Date, 6, 10) <= "2-29")
   return(list(
     spring_evictions, summer_evictions, fall_evictions, winter_evictions))
 }
