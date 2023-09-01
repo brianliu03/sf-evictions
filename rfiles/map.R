@@ -1,0 +1,41 @@
+library(osmdata)
+library(tidyverse)
+library(sf)
+library(data.table)
+
+# download OpenStreetMap data for San Francisco
+sf_map <- opq("San Francisco") %>%
+  add_osm_feature(key = "highway") %>%
+  osmdata_sf()
+
+source("rfiles/algo.R")
+
+# read in eviction data
+eviction_data <- read.csv("sfevictionnotices.csv", header = TRUE, sep = ",")
+eviction_data <- as_tibble(data.frame(eviction_data))
+
+# restructure eviction data
+eviction_data <- na.omit(restructure(eviction_data))
+
+eviction_sf <- st_as_sf(
+  eviction_data, coords = c("longitude", "latitude"), crs = 4326)
+
+# Plot maps for each year
+for (year in unique(year(eviction_sf$File.Date))) {
+  evictions_year <- eviction_sf %>% filter(year(File.Date) == year)
+  sf_map_filtered <- sf_map$osm_lines %>%
+    st_transform(crs = st_crs(evictions_year)) %>%
+
+  # Create the map
+  p <- ggplot() +
+    geom_sf(data = sf_map_filtered, color = "grey", size = 0.2, fill = NA) +
+    geom_sf(data = evictions_year, aes(color = eviction_type), size = 2) +
+    coord_sf(xlim = c(-122.5247, -122.3366), ylim = c(37.6983, 37.8312)) +
+    labs(title = paste("Evictions in San Francisco - Year", year),
+         caption = "Source: OpenStreetMap") +
+    theme_minimal()
+
+  # Save the map as an image
+  ggsave(filename = paste(
+    "evictions_map_", year, ".png", sep = ""), plot = p, width = 10, height = 8)
+}

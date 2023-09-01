@@ -3,10 +3,10 @@ library(tidyverse)
 library(sf)
 library(data.table)
 
-# # download OpenStreetMap data for San Francisco
-# sf_map <- opq("San Francisco") %>%
-#   add_osm_feature(key = "highway") %>%
-#   osmdata_sf()
+# download OpenStreetMap data for San Francisco
+sf_map <- opq("San Francisco") %>%
+  add_osm_feature(key = "highway") %>%
+  osmdata_sf()
 
 source("rfiles/algo.R")
 
@@ -15,7 +15,7 @@ eviction_data <- read.csv("sfevictionnotices.csv", header = TRUE, sep = ",")
 eviction_data <- as_tibble(data.frame(eviction_data))
 
 # restructure eviction data
-eviction_data <- restructure(eviction_data)
+eviction_data <- na.omit(restructure(eviction_data))
 
 counts_by_month_year <- get_counts_by_month_year(eviction_data)
 
@@ -527,14 +527,6 @@ ggplot(counts_by_month_year, aes(x = month, y = count)) +
   scale_x_continuous(breaks = seq(1, 324, 12),
                      labels = c(1997:2023))
 
-
-# create sf object from evictionData
-# eviction_sf <- st_as_sf(data_frame, coords = c("longitude", "latitude"),
-#                         crs = 4326)
-
-
-# set the projection of the eviction data to match the map
-# eviction_sf <- st_set_crs(eviction_sf, st_crs(sf_map$osm_lines))
 
 # # plot overall eviction notices
 # ggplot() +
