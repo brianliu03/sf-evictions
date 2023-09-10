@@ -18,10 +18,14 @@ mutate_file_point <- function(data) {
       longitude = as.double(
         gsub("\\s.*", "", gsub("POINT \\(", "", data$Shape))),
       latitude = as.double(
-        gsub("\\).*", "", gsub(".*\\s", "", gsub("POINT \\(", "", data$Shape))))
+        gsub("\\).*", "", gsub(".*\\s", "", gsub("POINT \\(", "", data$Shape)))
+      )
     )
   )
 }
+
+# function to sort eviction types into fault and no fault
+
 
 # function to delete unnecessary columns
 delete_unnecessary_columns <- function(data) {
@@ -58,6 +62,33 @@ format_types <- function(data) {
       values_transform = list(eviction_count = as.logical)) %>%
   filter(eviction_count == TRUE) %>% # nolint
   select(-eviction_count)
+  )
+}
+
+# function to divide eviction types by fault and no fault
+filter_fault_no_fault <- function(data) {
+  return(data <- data %>%
+    mutate(
+      Fault = ifelse(
+        eviction_type %in% c(
+          "Non.Payment", "Breach", "Nuisance", "Failure.to.Sign.Renewal", "Illegal.Use",
+          "Access.Denial", "Unapproved.Subtenant", "Roommate.Same.Unit", "Other.Cause",
+          "Late.Payments"
+        ),
+        TRUE,
+        FALSE
+      ),
+      No_Fault = ifelse(
+        eviction_type %in% c(
+          "Owner.Move.In", "Demolition", "Capital.Improvement", "Ellis.Act.Withdrawal",
+          "Condo.Conversion", "Development", "Good.Samaritan.Ends",
+          "Substantial.Rehab", "Lead.Remediation"
+        ),
+        TRUE,
+        FALSE
+      )
+    ) %>%
+    select(-eviction_type)
   )
 }
 
