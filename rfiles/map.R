@@ -3,6 +3,7 @@ library(tidyverse)
 library(sf)
 library(data.table)
 library(viridis)
+library(mapview)
 
 # download OpenStreetMap data for San Francisco
 sf_map <- opq("San Francisco") %>%
@@ -17,6 +18,8 @@ eviction_data <- as_tibble(data.frame(eviction_data))
 
 # restructure eviction data
 eviction_data <- na.omit(restructure(eviction_data))
+
+neighborhood_shapefile <- st_read("neighborhood_shapes/planning_neighborhoods.shp")
 
 # # filter to only fault or no fault
 # eviction_data <- filter_fault_no_fault(eviction_data)
@@ -33,11 +36,11 @@ custom_palette <- c(
   "orchid1", # Dv
   "#6A3D9A", # EAW
   "#FB9A99", # FTSR
-  "deeppink1", # GSE
+  "red", # GSE
   "#CAB2D6", # IU
   "#FDBF6F", # LP
   "khaki2", # LR
-  "maroon", # NP
+  "deeppink1", # NP
   "green4", # Nu
   "gold1", # OC
   "blue1", # OMI
@@ -50,26 +53,29 @@ custom_palette <- c(
 eviction_types <- sort(unique(eviction_sf$eviction_type))
 eviction_type_colors <- setNames(custom_palette, eviction_types)
 
+neighborhood_sf <- st_as_sf(neighborhood_shapefile)
+
 # Plot maps for each year
 for (year in unique(year(eviction_sf$File.Date))) {
   evictions_year <- eviction_sf %>% filter(year(File.Date) == year)
   sf_map_filtered <- sf_map$osm_lines %>%
     st_transform(crs = st_crs(evictions_year))
 
-  # Create the map and keep all data class labels in legend
-    p <- ggplot() +
-      geom_sf(data = sf_map_filtered, color = "grey", size = 0.2, fill = NA) +
-      geom_sf(data = evictions_year, aes(color = eviction_type), size = 1.0) +
-      scale_color_manual(values = eviction_type_colors) +
-      coord_sf(xlim = c(-122.5247, -122.3366), ylim = c(37.6983, 37.8312)) +
-      labs(title = paste("Evictions in San Francisco - Year", year),
-          caption = "Map Source: OpenStreetMap") +
-      theme_light() +
-      guides(color = guide_legend(override.aes = list(size = 2.5)))
+  # Create the map
+  p <- ggplot() +
+    geom_sf(data = sf_map_filtered, color = "grey", lwd = 0.1, fill = NA) +
+    geom_sf(data = evictions_year, aes(color = eviction_type), size = 1.0) +
+    geom_sf(data = neighborhood_sf, color = "black", lwd = 0.4, fill = NA) +
+    scale_color_manual(values = eviction_type_colors) +
+    coord_sf(xlim = c(-122.5247, -122.3366), ylim = c(37.6983, 37.8312)) +
+    labs(title = paste("Evictions in San Francisco - Year", year),
+         caption = "Map Source: OpenStreetMap") +
+    theme_light() +
+    guides(color = guide_legend(override.aes = list(size = 2.5)))
 
   # Save the map as an image
   ggsave(filename = paste(
-    "evictions_map_", year, ".png", sep = ""), plot = p, width = 10, height = 8)
+    "map_neighb_", year, ".png", sep = ""), plot = p, width = 10, height = 8)
 }
 
 # turbo_palette <- viridis(10, option = "viridis")[c(6, 2)]
