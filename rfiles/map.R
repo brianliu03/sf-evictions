@@ -57,7 +57,8 @@ neighborhood_sf <- st_as_sf(neighborhood_shapefile)
 
 # Plot maps for each year
 for (year in unique(year(eviction_sf$File.Date))) {
-  evictions_year <- eviction_sf %>% filter(year(File.Date) == year)
+  evictions_year <- eviction_sf %>% filter(year(File.Date) == year) %>%
+    mutate(eviction_type = factor(eviction_type, levels = eviction_types))
   sf_map_filtered <- sf_map$osm_lines %>%
     st_transform(crs = st_crs(evictions_year))
 
@@ -66,10 +67,10 @@ for (year in unique(year(eviction_sf$File.Date))) {
     geom_sf(data = sf_map_filtered, color = "grey", lwd = 0.1, fill = NA) +
     geom_sf(data = evictions_year, aes(color = eviction_type), size = 1.0) +
     geom_sf(data = neighborhood_sf, color = "black", lwd = 0.4, fill = NA) +
-    scale_color_manual(values = eviction_type_colors) +
+    scale_color_manual(name = "Eviction Type", values = eviction_type_colors, drop = FALSE) +
     coord_sf(xlim = c(-122.5247, -122.3366), ylim = c(37.6983, 37.8312)) +
     labs(title = paste("Evictions in San Francisco - Year", year),
-         caption = "Map Source: OpenStreetMap") +
+         caption = "Map Source: OpenStreetMap; Neighborhood lines and Evictions: DataSF") +
     theme_light() +
     guides(color = guide_legend(override.aes = list(size = 2.5)))
 
