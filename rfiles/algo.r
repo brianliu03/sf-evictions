@@ -148,26 +148,19 @@ get_eviction_counts_by_month <- function(data) {
 
 # function to get eviction counts by month and year
 get_counts_by_month_year <- function(data) {
-    eviction_counts_month_year <- list()
-    for (i in 1:312) {
-        if ((i - 1) %% 12 + 1 >= 10) {
-            eviction_counts_month_year[[i]] <- data %>%
-                filter(
-                    substring(File.Date, 1, 4) == toString(1997 + floor((i - 1) / 12)) &
-                         substring(File.Date, 6, 7) == toString((i - 1) %% 12 + 1)) %>%
-                summarise(count = n()) %>%
-                pull(count)
-        } else {
-            eviction_counts_month_year[[i]] <- data %>%
-                filter(
-                    substring(
-                        File.Date, 1, 4) == toString(1997 + floor((i - 1) / 12)) &
-                        substring(File.Date, 6, 7) == paste0("0", toString((i - 1) %% 12 + 1))) %>%
-                summarise(count = n()) %>%
-                pull(count)
-        }
-    }
-    return(eviction_counts_month_year)
+  
+  # Extract year, month, and month name from File.Date
+  data <- data %>%
+    mutate(Year = lubridate::year(File.Date),
+           Month = lubridate::month(File.Date),
+           Month_Name = month.name[lubridate::month(File.Date)])
+  
+  # Group by Year, Month, and Month_Name, and count the number of evictions
+  counts <- data %>%
+    group_by(Year, Month, Month_Name) %>%
+    summarise(Eviction_Count = n())
+  
+  return(counts)
 }
 
 # function to create a boostrap estimate of 95% confidence
