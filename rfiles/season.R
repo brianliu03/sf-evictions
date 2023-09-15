@@ -45,7 +45,7 @@ ggplot(eviction_proportions, aes(x = factor(Year), y = Proportion, fill = as.fac
     x = "Year",
     y = "Proportion of Evictions"
   ) +
-  facet_wrap(~Month_Name, ncol = 3) +  # Facet by month
+  facet_wrap(~factor(Month_Name, levels = month.name), ncol = 3) +  # Facet by month
   scale_fill_viridis(discrete = TRUE) +  # Use viridis color palette
   theme_minimal() +
   theme(

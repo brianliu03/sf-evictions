@@ -24,9 +24,6 @@ mutate_file_point <- function(data) {
   )
 }
 
-# function to sort eviction types into fault and no fault
-
-
 # function to delete unnecessary columns
 delete_unnecessary_columns <- function(data) {
   return(data %>%
@@ -89,6 +86,29 @@ filter_fault_no_fault <- function(data) {
       )
     ) %>%
     select(-eviction_type)
+  )
+}
+
+# function to divide eviction types into 4 categories
+filter_eviction_types_small <- function(data) {
+  return(data %>%
+    mutate(
+      eviction_category = case_when(
+        eviction_type %in% c("Non.Payment", "Late.Payments",
+                             "Failure.to.Sign.Renewal", "Good.Samaritan.Ends"
+                             ) ~ "Financial",
+        eviction_type %in% c("Breach", "Nuisance", "Illegal.Use",
+                             "Access.Denial", "Unapproved.Subtenant",
+                             "Roomate.Same.Unit") ~ "Fault",
+        eviction_type %in% c("Owner.Move.In", "Condo.Conversion", "Demolition",
+                             "Capital.Improvement", "Substantial.Rehab",
+                             "Lead.Remediation", "Development",
+                             "Ellis.Act.Withdrawal") ~ "Property_Change",
+        TRUE ~ "Other"
+      )
+    ) %>%
+    select(-eviction_type) %>%
+    arrange(File.Date)
   )
 }
 
