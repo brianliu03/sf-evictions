@@ -136,16 +136,6 @@ get_evictions_by_season <- function(data) {
     spring_evictions, summer_evictions, fall_evictions, winter_evictions))
 }
 
-# function to get evictions by year
-get_evictions_by_year <- function(data) {
-  eviction_data_by_year <- list()
-  for (i in 1:26) {
-    eviction_data_by_year[[i]] <- data %>%
-      filter(substring(File.Date, 1, 4) == toString(1996 + i))
-  }
-  return(eviction_data_by_year)
-}
-
 # function to get evictions by month
 get_evictions_by_month <- function(data) {
   # Extract month and month name from File.Date
@@ -172,6 +162,34 @@ get_counts_by_month_year <- function(data) {
   # Group by Year, Month, and Month_Name, and count the number of evictions
   counts <- data %>%
     group_by(Year, Month, Month_Name) %>%
+    summarise(Eviction_Count = n())
+  
+  return(counts)
+}
+
+# function to get eviction counts by year
+# keep eviction types as well
+get_counts_by_year_preserve_type <- function(data) {
+  # Extract year from File.Date
+  data <- data %>%
+    mutate(Year = lubridate::year(File.Date))
+  
+  # Group by Year, and count the number of evictions
+  counts <- data %>%
+    group_by(Year, eviction_type) %>%
+    summarise(Eviction_Count = n())
+  
+  return(counts)
+}
+
+get_counts_by_year <- function(data) {
+  # Extract year from File.Date
+  data <- data %>%
+    mutate(Year = lubridate::year(File.Date))
+  
+  # Group by Year, and count the number of evictions
+  counts <- data %>%
+    group_by(Year) %>%
     summarise(Eviction_Count = n())
   
   return(counts)
