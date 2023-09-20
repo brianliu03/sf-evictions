@@ -14,8 +14,8 @@ eviction_data <- get_counts_by_month_year(na.omit(restructure(eviction_data)))
 my_palette <- viridis_pal()(length(unique(eviction_data$Year)))
 
 
-ggplot(eviction_data, aes(x = factor(Month_Name, levels = month.name), y = Eviction_Count, color = as.factor(Year))) +
-  geom_point(size = 3) +  # Scatterplot points
+ggplot(eviction_data, aes(x = factor(Month_Name, levels = month.name), y = Eviction_Count, group = as.factor(Year), color = as.factor(Year))) +
+  geom_line(size = 1) +  # Lines connecting the data points for each year
   labs(
     title = "Eviction Counts by Month",
     x = "Month",
@@ -24,7 +24,24 @@ ggplot(eviction_data, aes(x = factor(Month_Name, levels = month.name), y = Evict
   ) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +  # Rotate x-axis labels for better readability
-  scale_color_manual(values = my_palette, name = "Year")
+  scale_color_manual(values = my_palette, name = "Year", guide = "none")
+
+# same plot as above but separate by year
+for (year in unique(eviction_data$Year)) {
+  p <- ggplot(eviction_data %>% filter(Year == year), aes(x = factor(Month_Name, levels = month.name), y = Eviction_Count)) +
+    geom_line(size = 1) +  # Lines connecting the data points for each year
+    labs(
+      title = paste("Eviction Counts by Month - Year", year),
+      x = "Month",
+      y = "Eviction Count"
+    ) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for better readability
+
+    ggsave(filename = paste(
+    "counts_by_month_", year, ".png", sep = ""), plot = p, width = 10, height = 8)
+}
+
 
 
 # Calculate the total number of evictions for each year
