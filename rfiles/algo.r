@@ -7,7 +7,7 @@ restructure <- function(data) {
   data <- mutate_file_point(data)
   data <- delete_unnecessary_columns(data)
   data <- format_types(data)
-  return(data)
+  return(na.omit(data))
 }
 
 # function to mutate file date and shape column
@@ -89,6 +89,12 @@ filter_fault_no_fault <- function(data) {
   )
 }
 
+filter_no_2023 <- function(data) {
+  return(data %>%
+    filter(File.Date < "2023-01-01")
+  )
+}
+
 # function to divide eviction types into 4 categories
 filter_eviction_types_small <- function(data) {
   return(data %>%
@@ -142,33 +148,21 @@ get_evictions_by_year <- function(data) {
 
 # function to get evictions by month
 get_evictions_by_month <- function(data) {
-  eviction_data_by_month <- list()
-  for (i in 1:12) {
-    if (i >= 10) {
-      eviction_data_by_month[[i]] <- data %>%
-        filter(substring(File.Date, 6, 7) == toString(i))
-    } else {
-      eviction_data_by_month[[i]] <- data %>%
-        filter(substring(File.Date, 6, 7) == paste0("0", toString(i)))
-    }
-  }
-  return(eviction_data_by_month)
-}
-
-# function to get eviction counts by month
-get_eviction_counts_by_month <- function(data) {
-  eviction_counts_by_month <- get_evictions_by_month(data)
-  for (i in 1:12) {
-    eviction_counts_by_month[[i]] <- eviction_counts_by_month[[i]] %>%
-      summarise(count = n()) %>%
-      pull(count)
-  }
-  return(eviction_counts_by_month)
+  # Extract month and month name from File.Date
+  data <- data %>%
+    mutate(Month = lubridate::month(File.Date),
+           Month_Name = month.name[lubridate::month(File.Date)])
+  
+  # Group by Month and Month_Name, and count the number of evictions
+  counts <- data %>%
+    group_by(Month, Month_Name) %>%
+    summarise(Eviction_Count = n())
+  
+  return(counts)
 }
 
 # function to get eviction counts by month and year
 get_counts_by_month_year <- function(data) {
-  
   # Extract year, month, and month name from File.Date
   data <- data %>%
     mutate(Year = lubridate::year(File.Date),
