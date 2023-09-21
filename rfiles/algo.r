@@ -124,7 +124,7 @@ filter_eviction_types_small <- function(data) {
 # remove empty neighborhoods
 group_by_neighborhood <- function(data) {
   return(data %>%
-    group_by(Neighborhood, eviction_category) %>%
+    group_by(File.Date, Neighborhood, eviction_category) %>%
     summarise(Eviction_Count = n()) %>%
     filter(Neighborhood != "")
   )
