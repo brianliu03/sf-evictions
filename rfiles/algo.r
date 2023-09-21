@@ -7,6 +7,8 @@ restructure <- function(data) {
   data <- mutate_file_point(data)
   data <- delete_unnecessary_columns(data)
   data <- format_types(data)
+  data <- data %>%
+    rename(Neighborhood = Neighborhoods...Analysis.Boundaries)
   return(na.omit(data))
 }
 
@@ -45,7 +47,7 @@ delete_unnecessary_columns <- function(data) {
 
 # function to format eviction types into one col
 format_types <- function(data) {
-  return(data <- data %>%
+  return(data %>%
     pivot_longer(
       cols =
         c("Non.Payment", "Breach", "Nuisance", "Illegal.Use",
@@ -64,7 +66,7 @@ format_types <- function(data) {
 
 # function to divide eviction types by fault and no fault
 filter_fault_no_fault <- function(data) {
-  return(data <- data %>%
+  return(data %>%
     mutate(
       Fault = ifelse(
         eviction_type %in% c(
@@ -114,6 +116,17 @@ filter_eviction_types_small <- function(data) {
       )
     ) %>%
     select(-eviction_type)
+  )
+}
+
+# function to group by neighborhood
+# but retain eviction types
+# remove empty neighborhoods
+group_by_neighborhood <- function(data) {
+  return(data %>%
+    group_by(Neighborhood, eviction_category) %>%
+    summarise(Eviction_Count = n()) %>%
+    filter(Neighborhood != "")
   )
 }
 
