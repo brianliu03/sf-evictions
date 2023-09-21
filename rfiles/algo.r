@@ -113,8 +113,7 @@ filter_eviction_types_small <- function(data) {
         TRUE ~ "Other"
       )
     ) %>%
-    select(-eviction_type) %>%
-    arrange(File.Date)
+    select(-eviction_type)
   )
 }
 
