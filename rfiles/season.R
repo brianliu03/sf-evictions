@@ -125,3 +125,16 @@ ggplot(eviction_proportions_transformed, aes(x = factor(Month_Name, levels = mon
   scale_color_manual(values = my_palette, name = "Month", guide = "none") +
   facet_wrap(~Year, ncol = 13)  # Create separate line plots for each year (13 columns in this example)
 
+# Create a ggplot to visualize the proportions by month (median)
+ggplot(eviction_proportions_transformed, aes(x = factor(Month_Name, levels = month.name), y = Transformed_Proportion_Median, group = as.factor(Year), color = as.factor(Year))) +
+  geom_line(size = 1) +
+  geom_hline(yintercept = 0, size = 0.5, color = "black") +
+  labs(
+    title = "Proportion: Evictions Counts per Month over Median Evictions by Month",
+    x = "Month",  # Remove x-axis label
+    y = "Proportion of Evictions (log_2)"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_blank()) +  # Remove x-axis text labels
+  scale_color_manual(values = my_palette, name = "Month", guide = "none") +
+  facet_wrap(~Year, ncol = 13)  # Create separate line plots for each year (13 columns in this example)
