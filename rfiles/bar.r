@@ -26,7 +26,7 @@ eviction_data$eviction_category <- factor(
 
 # Create the stacked bar plot with viridis color palette
 ggplot(eviction_data, aes(x = factor(Year), y = Eviction_Count, fill = eviction_category)) +
-  geom_bar(stat = "identity", position = "dodge", width = 1.0) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7) +
   labs(
     title = "Eviction Counts by Year and Type",
     x = "Year",
