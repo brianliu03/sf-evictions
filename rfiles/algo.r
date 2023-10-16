@@ -120,11 +120,21 @@ filter_eviction_types_small <- function(data) {
 }
 
 # function to group by neighborhood
-# but retain eviction types
 # remove empty neighborhoods
-group_by_neighborhood <- function(data) {
+group_by_neighborhood_cat <- function(data) {
   return(data %>%
     group_by(File.Date, Neighborhood, eviction_category) %>%
+    summarise(Eviction_Count = n()) %>%
+    filter(Neighborhood != "")
+  )
+}
+
+# function to group by neighborhood
+# retain eviction types
+# remove empty neighborhoods
+group_by_neighborhood_types <- function(data) {
+  return(data %>%
+    group_by(File.Date, Neighborhood, eviction_type) %>%
     summarise(Eviction_Count = n()) %>%
     filter(Neighborhood != "")
   )

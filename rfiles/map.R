@@ -83,6 +83,7 @@ for (year in unique(year(eviction_sf$File.Date))) {
 #     "evictions_map_", year, ".png", sep = ""), plot = p, width = 10, height = 8)
 # }
 
+## palette for easier readability if using all eviction types
 # custom_palette <- c(
 #   "dodgerblue2", # AD
 #   "#E31A1C", # Br
